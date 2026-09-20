@@ -25,8 +25,11 @@ app.use(express.static(frontendPath));
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
 
 // Root route - serve frontend index.html
 app.get('/', (req, res) => {
@@ -34,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.status(200).json({
     status: 'online',
     system: 'TaskFlow REST API',
@@ -46,12 +49,16 @@ app.get('/api/health', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+// Only listen when executed directly via `node server.js`
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log('=========================================================');
+    console.log(`  TaskFlow Server running on http://localhost:${PORT}`);
+    console.log(`  Frontend UI: http://localhost:${PORT}`);
+    console.log(`  API Health: http://localhost:${PORT}/api/health`);
+    console.log('=========================================================');
+  });
+}
 
-app.listen(PORT, () => {
-  console.log('=========================================================');
-  console.log(`  TaskFlow Server running on http://localhost:${PORT}`);
-  console.log(`  Frontend UI: http://localhost:${PORT}`);
-  console.log(`  API Health: http://localhost:${PORT}/api/health`);
-  console.log('=========================================================');
-});
+module.exports = app;
